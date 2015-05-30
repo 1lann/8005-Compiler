@@ -4,15 +4,13 @@ import (
 	"bufio"
 	// "errors"
 	"fmt"
-	"io"
 	"os"
-	"strings"
 )
 
-func cliHandle() *bufio.Reader {
+func cliHandle() (*bufio.Reader, string) {
 	if len(os.Args) < 2 {
 		fmt.Println("No file specified! Use -h for more information")
-		return nil
+		return nil, ""
 	}
 
 	fileName := os.Args[1]
@@ -20,7 +18,7 @@ func cliHandle() *bufio.Reader {
 	if fileName == "-h" || fileName == "--help" {
 		fmt.Println("8005 Compiler by Jason Chu")
 		fmt.Println("Usage: 8005c [file name]")
-		return nil
+		return nil, ""
 	}
 
 	file, fileErr := os.Open(fileName)
@@ -28,7 +26,7 @@ func cliHandle() *bufio.Reader {
 	if fileErr != nil {
 		if os.IsNotExist(fileErr) {
 			fmt.Println(fileName + ": file does not exist!")
-			return nil
+			return nil, ""
 		} else if os.IsPermission(fileErr) {
 			fmt.Println(fileName + ": permission denied")
 		} else if os.IsExist(fileErr) {
@@ -40,17 +38,21 @@ func cliHandle() *bufio.Reader {
 
 	reader := bufio.NewReader(file)
 
-	return reader
+	return reader, fileName
 }
 
 func main() {
-	reader := cliHandle()
+	reader, filename := cliHandle()
 	if reader == nil {
 		return
 	}
 
-	resp, err := compile(reader)
+	out, err := compile(filename, reader)
 	if err != nil {
+		fmt.Println("Failed to compile!")
+		fmt.Println(err)
 		return
 	}
+
+	fmt.Println(out)
 }

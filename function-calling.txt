@@ -1,0 +1,21 @@
+* Call function
+    - Function return handler?
+    - Maximum of 1 stack?
+
+
+Frames ++++
+Byte code ++++++++++++++++++++
+
+Frames:
+if r0 == 0 goto x
+if r0 != 0 goto x
+4 bytes
+
+Stages of compilation
+Compile up to a loop
+The loop is unwinded
+
+
+Ifs:
+SUBSTITUTION_IF_RETURN:0 // 0 being if ID
+SUBSTITUION_GOTO_IF // 0 being if ID

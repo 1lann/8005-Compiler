@@ -1,4 +1,3 @@
-a
-b
-c
-d
+#define TEST 10
+
+func cat {

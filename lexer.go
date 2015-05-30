@@ -1,54 +1,36 @@
 package main
 
-const (
-	blockWhile = iota
-	blockIf
-)
+import "fmt"
 
 const (
-	blockBreakVar = "BLOCK_BREAK_VARIABLE"
-)
-
-type block struct {
-	blockType           string
-	blockBreakLocations []int
-	blockStartLocation  int
-	returnLocation      int
-	jumpInstructions    map[int][]int
-}
-
-type compilerSet struct {
-	instructions [255]int
-	blockStack   []block
-	functionMap  map[string][]int // Maps names to address substitutions required
-	variableMap  map[string][]int // Maps names to address substitutions required
-}
-
-const (
-	tokenR0           = "TOKEN_R0"
-	tokenR1           = "TOKEN_R1"
-	tokenStore        = "TOKEN_STORE"
-	tokenLoad         = "TOKEN_LOAD"
-	tokenSelfMult     = "TOKEN_SELF_MULT"
-	tokenSelfAdd      = "TOKEN_SELF_ADD"
-	tokenSelfSub      = "TOKEN_SELF_SUB"
-	tokenMult         = "TOKEN_MULT"
-	tokenAdd          = "TOKEN_ADD"
-	tokenSub          = "TOKEN_SUB"
-	tokenDiv          = "TOKEN_DIV"
-	tokenIf           = "TOKEN_IF"
-	tokenLoop         = "TOKEN_LOOP"
-	tokenBreak        = "TOKEN_BREAK"
-	tokenReturn       = "TOKEN_RETURN"
-	tokenEquals       = "TOKEN_EQUALS"
-	tokenIncrement    = "TOKEN_INCREMENT"
-	tokenDecrement    = "TOKEN_DECREMENT"
-	tokenFunction     = "TOKEN_FUNCTION"
-	tokenSet          = "TOKEN_SET"
-	tokenOpenCurly    = "TOKEN_OPEN_CURLY"
-	tokenCloseCurly   = "TOKEN_CLOSE_CURLY"
-	tokenOpenBracket  = "TOKEN_OPEN_BRACKET"
-	tokenCloseBracket = "TOKEN_CLOSE_BRACKET"
+	tokenR0             = "TOKEN_R0"
+	tokenR1             = "TOKEN_R1"
+	tokenStore          = "TOKEN_STORE"
+	tokenLoad           = "TOKEN_LOAD"
+	tokenSelfMult       = "TOKEN_SELF_MULT"
+	tokenSelfAdd        = "TOKEN_SELF_ADD"
+	tokenSelfSub        = "TOKEN_SELF_SUB"
+	tokenMult           = "TOKEN_MULT"
+	tokenAdd            = "TOKEN_ADD"
+	tokenSub            = "TOKEN_SUB"
+	tokenDiv            = "TOKEN_DIV"
+	tokenIf             = "TOKEN_IF"
+	tokenLoop           = "TOKEN_LOOP"
+	tokenBreak          = "TOKEN_BREAK"
+	tokenReturn         = "TOKEN_RETURN"
+	tokenEquals         = "TOKEN_EQUALS"
+	tokenIncrement      = "TOKEN_INCREMENT"
+	tokenDecrement      = "TOKEN_DECREMENT"
+	tokenFunction       = "TOKEN_FUNCTION"
+	tokenSet            = "TOKEN_SET"
+	tokenOpenCurly      = "TOKEN_OPEN_CURLY"
+	tokenCloseCurly     = "TOKEN_CLOSE_CURLY"
+	tokenOpenBracket    = "TOKEN_OPEN_BRACKET"
+	tokenCloseBracket   = "TOKEN_CLOSE_BRACKET"
+	tokenDefine         = "TOKEN_DEFINE"
+	tokenQuote          = "TOKEN_QUOTE"
+	tokenFunctionDefine = "TOKEN_FUNCTION_DEFINE"
+	tokenConsumed       = "TOKEN_CONSUMED" // Seperator used by the compiler
 )
 
 var tokenMapping map[string]string
@@ -71,6 +53,8 @@ func init() {
 	identifierMapping["loop"] = tokenLoop
 	identifierMapping["break"] = tokenBreak
 	identifierMapping["return"] = tokenReturn
+	identifierMapping["#define"] = tokenDefine
+	identifierMapping["func"] = tokenFunctionDefine
 
 	singleTokenMapping = make(map[string]string)
 	singleTokenMapping["-"] = tokenSub
@@ -82,6 +66,7 @@ func init() {
 	singleTokenMapping["}"] = tokenCloseCurly
 	singleTokenMapping["("] = tokenOpenBracket
 	singleTokenMapping[")"] = tokenCloseBracket
+	singleTokenMapping["\""] = tokenQuote
 }
 
 func getTokens(str string) []string {
@@ -136,9 +121,9 @@ func getTokens(str string) []string {
 		subAlphaNum := ""
 
 		for i := 0; i < len(str); i++ {
-			if (str[i] > 'a' && str[i] < 'z') ||
-				(str[i] > 'A' && str[i] < 'Z') ||
-				(str[i] > '0' && str[i] < '9') {
+			if (str[i] >= 'a' && str[i] <= 'z') ||
+				(str[i] >= 'A' && str[i] <= 'Z') ||
+				(str[i] >= '0' && str[i] <= '9') {
 				subAlphaNum += string(str[i])
 			} else {
 				break
@@ -149,11 +134,24 @@ func getTokens(str string) []string {
 			tokenList = append(tokenList, tokenR0)
 		} else if subAlphaNum == "r1" {
 			tokenList = append(tokenList, tokenR1)
-		} else {
+		} else if len(subAlphaNum) > 0 {
 			tokenList = append(tokenList, subAlphaNum)
 		}
 
+		if str == "//" {
+			break
+		}
+
 		str = str[len(subAlphaNum):]
+
+		if len(subAlphaNum) <= 0 {
+			if str[0] == ';' {
+				str = str[1:]
+			} else {
+				fmt.Println("Lexer warning: Skipping character \"" + str[:1] + "\"")
+				str = str[1:]
+			}
+		}
 	}
 
 	for keyword, token := range singleTokenMapping {
