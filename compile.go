@@ -10,53 +10,37 @@ import (
 )
 
 const (
-	blockFunction = "BLOCK_FUNCTION"
-	blockLoop     = "BLOCK_LOOP"
-	blockIf       = "BLOCK_IF"
-)
+	substitutionFrame       = "SUBSTITUTION_FRAME:"        // Value inside frame
+	substitutionFrameReturn = "SUBSTITUTION_FRAME_RETURN:" // For returns inside frames
 
-const (
-	substitutionFrame        = "SUBSTITUTION_FRAME" // Frames for functions
-	substitutionReturnFrameA = "SUBSTITUTION_RETURN_FRAME_A"
-	substitutionReturnFrameB = "SUBSTITUTION_RETURN_FRAME_B"
+	substitutionFunctionReturn = "SUBSTITUTION_FUNCTION_RETURN:" // Not even in the frame
 
-	substitiutionLoopExit = "SUBSTITUTION_LOOP_EXIT" // Also used for else statements
+	substitiutionConditionExit = "SUBSTITUTION_CONDITION_EXIT:"
+	substitutionGotoFunction   = "SUBSTITUTION_GOTO_FUNCTION:"
+	substitutionLoopStart      = "SUBSTITUTION_LOOP_START:"
 
-	substitutionGotoFunction = "SUBSTITUTION_GOTO_FUNCTION"
-	substitutionGotoIf       = "SUBSTITUTION_GOTO_IF" // Ifs are one way and have hard-coded frames
+	substitutionPushNextPointer = "SUBSTITUTION_PUSH_NEXT_POINTER:" // Pushes the pointer to the next instruction
 )
 
 type instruction struct {
 	value int
 	// substitutionType string
-	line       int // Corresponding line number
-	key        string
+	line       int    // Corresponding line number
+	key        string // SubstitutionType:Key
 	pointerKey string // SubstitutionType:Key
 }
 
 type block struct {
-	blockType string
-	name      string
+	name string
 	// Return point locations are frameLocation + 1 and frameLocation + 3
 	instructions []instruction
-	cursor       int
 }
-
-// type programObject struct {
-// 	frameSubstitutions       map[string]int // Points to start of return frame
-// 	returnPointSubstitutions map[string]int // Points to points inside the return frame
-// 	gotoSubstitutions        map[string]int // Points to start of object
-// 	block                    int            // For blocks
-// 	location                 int            // For variables
-// }
 
 type compilerSet struct {
 	instructions [256]int
 	blocks       []block
 	cursor       int
 	keyIota      int
-	// functionMap  map[string]programObject // Maps names to address substitutions required
-	// variableMap  map[string]programObject // Maps names to address substitutions required
 	defineMap    map[string]int // Maps #defines
 	currentLine  int
 	filename     string
@@ -140,19 +124,25 @@ func consumeLexerArray(lexerArray []string, cursor int, length int) {
 	}
 }
 
-func warn(set *compilerSet, warning string) {
+func (set *compilerSet) warn(warning string) {
 	fmt.Println(set.filename + ":" + strconv.Itoa(set.currentLine) + ": " +
 		"warning: " + warning)
+}
+
+func (set *compilerSet) appendInstruction(instruct instruction) {
+	instruct.line = set.currentLine
+	set.blocks[set.currentBlock].instructions = append(
+		set.blocks[set.currentBlock].instructions,
+		instruct,
+	)
 }
 
 func compile(filename string, reader *bufio.Reader) ([256]int, error) {
 	compiler := compilerSet{}
 	compiler.filename = filename
 	compiler.currentBlock = 0
-	compiler.functionMap = make(map[string]programObject)
-	compiler.variableMap = make(map[string]programObject)
 	compiler.defineMap = make(map[string]int)
-	compiler.currentBlock = -1
+	compiler.blocks = append(compiler.blocks, block{name: "main"})
 
 	for {
 		lineData, err := reader.ReadBytes('\n')

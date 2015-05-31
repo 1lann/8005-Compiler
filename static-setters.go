@@ -6,16 +6,12 @@ import (
 )
 
 func writeStaticSetterInstruction(rtoken string, value int, set *compilerSet) {
-	blockCursor := set.blocks[set.currentBlock].cursor
-	blockInstructions := set.blocks[set.currentBlock].instructions
 	if rtoken == tokenR0 {
-		blockInstructions[blockCursor] = 10
-		blockInstructions[blockCursor+1] = value
-		set.blocks[set.currentBlock].cursor += 2
+		set.appendInstruction(instruction{value: 10})
+		set.appendInstruction(instruction{value: value})
 	} else if rtoken == tokenR1 {
-		blockInstructions[blockCursor] = 11
-		blockInstructions[blockCursor] = value
-		set.blocks[set.currentBlock].cursor += 2
+		set.appendInstruction(instruction{value: 11})
+		set.appendInstruction(instruction{value: value})
 	}
 }
 
@@ -28,8 +24,8 @@ func parseStaticSet(lexerArray []string, set *compilerSet) error {
 			continue
 		}
 
-		if len(lexerArray)-cursor <= 1 {
-			return errors.New("Unknown r0/r1 use")
+		if cursor == len(lexerArray)-1 {
+			return errors.New("Invalid r0/r1 use")
 		}
 
 		if lexerArray[cursor+1] != tokenSet {
@@ -42,7 +38,8 @@ func parseStaticSet(lexerArray []string, set *compilerSet) error {
 		}
 
 		if isToken(lexerArray[cursor+2]) {
-			return errors.New("Setter got unexpected token: " + lexerArray[cursor+2])
+			return errors.New("Setter got unexpected token: " +
+				lexerArray[cursor+2])
 		} else if isNumber(lexerArray[cursor+2]) {
 			num, _ := strconv.Atoi(lexerArray[cursor+2])
 			writeStaticSetterInstruction(token, num, set)

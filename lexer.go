@@ -47,10 +47,12 @@ func init() {
 	tokenMapping["++"] = tokenIncrement
 	tokenMapping["--"] = tokenDecrement
 	tokenMapping["=="] = tokenEquals
+	tokenMapping["!="] = tokenNotEquals
 
 	identifierMapping = make(map[string]string)
 	identifierMapping["if"] = tokenIf
 	identifierMapping["loop"] = tokenLoop
+	identifierMapping["for"] = tokenLoop
 	identifierMapping["break"] = tokenBreak
 	identifierMapping["return"] = tokenReturn
 	identifierMapping["#define"] = tokenDefine

@@ -1,5 +1,7 @@
 package main
 
+import "strconv"
+
 func parseBlockClosure(lexerArray []string, set *compilerSet) error {
 	cursor := 0
 	for cursor < len(lexerArray) {
@@ -19,23 +21,40 @@ func parseBlockClosure(lexerArray []string, set *compilerSet) error {
 		// Unwind into embedded block if necessary (loops only I think)
 
 		thisBlock := set.blocks[set.currentBlock]
-		thisInstructionSet := set.blocks[set.currentBlock].instructions
-		thisCursor := set.blocks[set.currentBlock].cursor
+		blockInstructions := set.blocks[set.currentBlock].instructions
 		switch thisBlock.blockType {
 		// Return on functions
 		case blockFunction:
-			thisInstructionSet[thisCursor] = 8
-			thisInstructionSet[thisCursor+1] = 0
-			thisBlock.name
-		// Ifs are virtually functions, return too
-		case blockIf:
+			key := substitutionFrameReturn + thisBlock.name
+			set.appendInstruction(instruction{value: 10})
+			set.appendInstruction(instruction{value: 0})
+			set.appendInstruction(instruction{value: 9})
+			set.appendInstruction(instruction{value: 0, key: key})
 
+			set.currentBlock = set.parentBlocks[len(set.parentBlocks)-1]
+			set.parentBlocks = set.parentBlocks[:len(set.parentBlocks)-1]
+
+		case blockIf:
+			pointerKey := substitutionPushNextPointer +
+				substitiutionConditionExit + strconv.Itoa(set.keyIota)
+
+			set.keyIota++
+			blockInstructions[len(blockInstructions)-1].pointerKey = pointerKey
 		// Loops are embedded, go back to the start
 		case blockLoop:
+			key := substitutionLoopStart + strconv.Itoa(set.keyIota)
+			pointerKey := substitutionPushNextPointer +
+				substitiutionConditionExit + strconv.Itoa(set.keyIota)
+			set.keyIota++
 
+			set.appendInstruction(instruction{value: 8})
+			set.appendInstruction(instruction{value: 0, key: key})
+			set.appendInstruction(instruction{value: 9})
+			set.appendInstruction(instruction{value: 0, key: key,
+				pointerKey: pointerKey})
 		}
 
-		set.blocks[set.currentBlock].cursor = thisCursor
+		consumeLexerArray(lexerArray, cursor, 1)
 	}
 
 }

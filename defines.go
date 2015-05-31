@@ -15,7 +15,7 @@ func mapDefines(lexerArray []string, set *compilerSet) error {
 		}
 
 		if len(lexerArray)-cursor <= 2 {
-			return errors.New("Expected #define key and value, got new line")
+			return errors.New("Expected #define key and value, got newline")
 		}
 
 		if isNumber(lexerArray[cursor+1]) {
@@ -33,7 +33,7 @@ func mapDefines(lexerArray []string, set *compilerSet) error {
 		num, _ := strconv.Atoi(lexerArray[cursor+2])
 
 		if num > 255 {
-			warn(set, "> 255 number overflow")
+			set.warn("> 255 number overflow")
 		}
 
 		set.defineMap[lexerArray[cursor+1]] = num

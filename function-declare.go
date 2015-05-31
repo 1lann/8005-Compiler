@@ -14,11 +14,21 @@ func processFunctionDefinition(name string, set *compilerSet) error {
 	object.block = blockNum
 
 	newBlock := block{}
-	newBlock.blockType = blockFunction
 	newBlock.name = name
 
 	set.blocks = append(set.blocks, newBlock)
+	set.parentBlocks = append(set.parentBlocks, set.currentBlock)
 	set.currentBlock = blockNum
+
+	returnKey := substitutionFrame + name
+	frameKey := substitutionPushNextPointer + substitutionGotoFunction + name
+	gotoKey := substitutionFrameReturn + name
+
+	set.appendInstruction(instruction{value: 10, pointerKey: gotoKey})
+	set.appendInstruction(instruction{value: 0})
+	set.appendInstruction(instruction{value: 9})
+	set.appendInstruction(instruction{value: 10, pointerKey: returnKey})
+	set.appendInstruction(instruction{value: 0, pointerKey: frameKey})
 
 	return nil
 }
@@ -42,9 +52,14 @@ func parseFunctionDefinition(lexerArray []string, set *compilerSet) error {
 			return errors.New("Function definition name cannot be a number")
 		}
 
+		if isToken(lexerArray[cursor+1]) {
+			return errors.New("Expected function name, got \"" +
+				lexerArray[cursor+1] + "\"")
+		}
+
 		if lexerArray[cursor+2] != tokenOpenCurly {
-			return errors.New("Unexpected \"" + lexerArray[cursor+2] +
-				"\", expected \"{\"")
+			return errors.New("Expected \"{\", got \"" +
+				lexerArray[cursor+2] + "\"")
 		}
 
 		err := processFunctionDefinition(lexerArray[cursor+1], set)
