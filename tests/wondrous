@@ -1,0 +1,98 @@
+// Argument: r1
+// Return: r1
+func half {
+	r0 = r1
+	r1 = 0
+	loop {
+		r0++
+		if r0 == 0 {
+			r1 = -1
+			return
+		}
+
+		r1++
+		r0 -= 3
+
+		if r0 == 0 {
+			return
+		}
+	}
+}
+
+// Arguments: r1
+// Return: r1
+func isEven {
+	:half
+
+	r0 = r1
+	r0++
+	if r0 == 0 {
+		// Is odd
+		r1 = 0
+		return
+	}
+
+	// Otherwise is even
+	r1 = 1
+	return
+}
+
+// Argument: r1
+// Return: r1
+func nextTerm {
+	r1 -> inputTerm
+
+	:isEven
+	r0 = r1
+	if r0 == 0 {
+		// Is odd
+		r1 <- inputTerm
+
+		// Multiply by 3
+		r0 = r1
+		r0 += r1
+		r0 += r1
+
+		// Add 1
+		r0++
+
+		r1 = r0
+		return
+	}
+
+	// Is even
+	r1 <- inputTerm
+	:half
+	return
+}
+
+r1 <- 255
+
+r0 = r1
+:printInt
+r0 = ' '
+:printChar
+
+loop {
+	:nextTerm
+
+	r1 -> lastNum
+	r0 = r1
+	:printInt
+
+	if r0 == 0 {
+		// Stop at zero
+		break
+	}
+
+	r0--
+	if r0 == 0{
+		// Or one
+		break
+	}
+
+	r0 = ' '
+	:printChar
+
+	r1 <- lastNum
+}

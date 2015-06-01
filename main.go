@@ -5,6 +5,7 @@ import (
 	// "errors"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func cliHandle() (*bufio.Reader, string) {
@@ -54,5 +55,12 @@ func main() {
 		return
 	}
 
-	fmt.Println(out)
+	textOut := ""
+
+	for _, val := range out {
+		textOut += strconv.Itoa(val) + " "
+	}
+
+	fmt.Println("Program compiled")
+	fmt.Println(textOut)
 }

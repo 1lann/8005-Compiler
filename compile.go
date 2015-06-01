@@ -10,32 +10,10 @@ import (
 )
 
 const (
-	substitutionFrame       = "SUBSTITUTION_FRAME:"        // Value inside frame
-	substitutionFrameReturn = "SUBSTITUTION_FRAME_RETURN:" // For returns inside frames
-
-	substitutionFunctionReturn = "SUBSTITUTION_FUNCTION_RETURN:" // Not even in the frame
-
-	substitiutionConditionExit = "SUBSTITUTION_CONDITION_EXIT:"
-	substitutionGotoFunction   = "SUBSTITUTION_GOTO_FUNCTION:"
-	substitutionLoopStart      = "SUBSTITUTION_LOOP_START:"
-
-	substitutionVariable = "SUBSTITUTION_VARIABLE:"
+	blockFunction = iota
+	blockIf
+	blockLoop
 )
-
-type instruction struct {
-	value int
-	// substitutionType string
-	line           int      // Corresponding line number
-	key            string   // SubstitutionType:Key
-	pointerKey     []string // SubstitutionType:Key
-	pushPointerKey []string // SubstitutionType:Key
-}
-
-type block struct {
-	name string
-	// Return point locations are frameLocation + 1 and frameLocation + 3
-	instructions []instruction
-}
 
 type compilerSet struct {
 	instructions [256]int
@@ -47,19 +25,12 @@ type compilerSet struct {
 	currentLine  int
 	filename     string
 	currentBlock int
+	currentType  int
 	parentBlocks []int
 	parentIota   []int
+	parentTypes  []int
+	tempMemory   int
 }
-
-const (
-	stopInst = iota
-	incrementR0Inst
-	incrementR1Inst
-	decrementR0Inst
-	decrementR1Inst
-	equalsZeroGotoInst
-	notEqualsZeroGotoInst
-)
 
 // Disallow expressions because "they are too hard" ;)
 // Setting/multing/adding r0
@@ -86,29 +57,136 @@ func isToken(str string) bool {
 	return false
 }
 
+func convertChars(str string) string {
+	currentRune := ' '
+
+	for currentRune <= '~' {
+		str = strings.Replace(str, "'"+string(currentRune)+"'",
+			strconv.Itoa(int(currentRune)), -1)
+
+		currentRune++
+	}
+
+	return str
+}
+
+func convertNegative(str string) string {
+	for i := -99; i < 0; i++ {
+		str = strings.Replace(str, strconv.Itoa(i), strconv.Itoa(256+i), -1)
+	}
+
+	return str
+}
+
 func compileLine(line string, set *compilerSet) error {
 	line = strings.Replace(line, "\t", " ", -1)
+	line = convertChars(line)
+	line = convertNegative(line)
 
-	parts := strings.Split(strings.ToLower(line), " ")
+	parts := strings.Split(line, " ")
 
 	lexerArray := make([]string, 0)
 
 	for _, part := range parts {
-		tokens := getTokens(part)
+		part = strings.Replace(part, "\n", "", 1)
+		tokens, comment := getTokens(part)
 		lexerArray = append(lexerArray, tokens...)
+		if comment {
+			break
+		}
 	}
 
-	if set.currentBlock < 0 {
-		if err := mapDefines(lexerArray, set); err != nil {
-			return err
+	lastCursor := -1
+	lexerCursor := 0
+
+	for lexerCursor != lastCursor && lexerCursor < len(lexerArray) {
+		lastCursor = lexerCursor
+
+		if set.currentBlock == 0 {
+			if err := mapDefines(lexerArray, &lexerCursor, set); err != nil {
+				return err
+			}
+			if lastCursor != lexerCursor {
+				continue
+			}
+
+			if err := parseFunctionDefinition(lexerArray, &lexerCursor, set); err != nil {
+				return err
+			}
+			if lastCursor != lexerCursor {
+				continue
+			}
+
 		}
 
-		if err := parseFunctionDefinition(lexerArray, set); err != nil {
+		if err := parseStaticSet(lexerArray, &lexerCursor, set); err != nil {
 			return err
 		}
-	} else {
-		if err := parseStaticSet(lexerArray, set); err != nil {
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseIncrementDecrement(lexerArray, &lexerCursor, set); err != nil {
 			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseFunctionCall(lexerArray, &lexerCursor, set); err != nil {
+			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseGetVariable(lexerArray, &lexerCursor, set); err != nil {
+			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseSetVariable(lexerArray, &lexerCursor, set); err != nil {
+			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseIfDefinition(lexerArray, &lexerCursor, set); err != nil {
+			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseLoopDefinition(lexerArray, &lexerCursor, set); err != nil {
+			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseBlockClosure(lexerArray, &lexerCursor, set); err != nil {
+			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseLoopBreak(lexerArray, &lexerCursor, set); err != nil {
+			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
+		}
+
+		if err := parseFunctionReturn(lexerArray, &lexerCursor, set); err != nil {
+			return err
+		}
+		if lastCursor != lexerCursor {
+			continue
 		}
 	}
 
@@ -121,58 +199,12 @@ func compileLine(line string, set *compilerSet) error {
 	return nil
 }
 
-func consumeLexerArray(lexerArray []string, cursor int, length int) {
-	for i := cursor; i < length; i++ {
+func consumeLexerArray(lexerArray []string, cursor *int, length int) {
+	for i := *cursor; i < *cursor+length; i++ {
 		lexerArray[i] = tokenConsumed
 	}
-}
 
-func (set *compilerSet) warn(warning string) {
-	fmt.Println(set.filename + ":" + strconv.Itoa(set.currentLine) + ": " +
-		"warning: " + warning)
-}
-
-func (set *compilerSet) appendInstruction(instruct instruction) {
-	instruct.line = set.currentLine
-	set.blocks[set.currentBlock].instructions = append(
-		set.blocks[set.currentBlock].instructions,
-		instruct,
-	)
-}
-
-func (set *compilerSet) addPointerKey(key string) {
-	instructions := set.blocks[set.currentBlock].instructions
-	instructions[len(instructions)-1].pointerKey = append(
-		instructions[len(instructions)-1].pointerKey,
-		key,
-	)
-}
-
-func (set *compilerSet) pushPointerKey(key string) {
-	instructions := set.blocks[set.currentBlock].instructions
-	instructions[len(instructions)-1].pushPointerKey = append(
-		instructions[len(instructions)-1].pushPointerKey,
-		key,
-	)
-}
-
-func (set *compilerSet) getCurrentIota() int {
-
-}
-
-func (set *compilerSet) stepUpIota() int {
-
-}
-
-func (set *compilerSet) setupDownIota() {
-	set.currentIota = set.parentIota[len(set.parentIota)-1]
-	set.parentIota = set.parentIota[:len(set.parentIota)-1]
-}
-
-func (set *compilerSet) getUniqueIota() int {
-	uniqueIota := set.newIota
-	set.newIota++
-	return uniqueIota
+	*cursor += length
 }
 
 func compile(filename string, reader *bufio.Reader) ([256]int, error) {
@@ -182,17 +214,60 @@ func compile(filename string, reader *bufio.Reader) ([256]int, error) {
 	compiler.defineMap = make(map[string]int)
 	compiler.blocks = append(compiler.blocks, block{name: "main"})
 
+	// TODO Can be replaced by an allocate memory function
+	compiler.tempMemory = compiler.getUniqueIota()
+	tempMemoryBlock := block{}
+	tempMemoryBlock.instructions = append(tempMemoryBlock.instructions,
+		instruction{value: 0})
+	compiler.blocks = append(compiler.blocks, tempMemoryBlock)
+	compiler.currentBlock = 1
+	compiler.addPointerKey(substitutionVariable +
+		strconv.Itoa(compiler.tempMemory))
+	compiler.currentBlock = 0
+
+	allErrors := []error{}
+
 	for {
 		lineData, err := reader.ReadBytes('\n')
 		if err != nil {
 			if err == io.EOF {
-				if compiler.currentBlock >= 0 {
-					return [256]int{},
-						errors.New("Reached end of file without closing " +
-							"block (You're missing a \"}\" somewhere)")
+				if compiler.currentBlock > 0 {
+					allErrors = append(allErrors,
+						errors.New(compiler.filename+": Reached end of "+
+							"file without closing block (You're missing a "+
+							"\"}\" somewhere)"),
+					)
 				}
 
-				assembleProgram(&compiler)
+				if len(allErrors) > 10 {
+					concat := ""
+
+					for i := 0; i < 10; i++ {
+						concat += allErrors[i].Error() + "\n"
+					}
+
+					concat += "and " + strconv.Itoa(len(allErrors)-10) +
+						" additional errors..."
+
+					return [256]int{},
+						errors.New(concat)
+				} else if len(allErrors) > 0 {
+					concat := ""
+
+					for i := 0; i < len(allErrors); i++ {
+						concat += allErrors[i].Error() + "\n"
+					}
+
+					concat = concat[:len(concat)-1]
+
+					return [256]int{},
+						errors.New(concat)
+				}
+
+				if err := assembleProgram(&compiler); err != nil {
+					return [256]int{},
+						errors.New(compiler.filename + ":" + err.Error())
+				}
 
 				break
 			}
@@ -207,7 +282,7 @@ func compile(filename string, reader *bufio.Reader) ([256]int, error) {
 		if err := compileLine(line, &compiler); err != nil {
 			err = errors.New(compiler.filename + ":" +
 				strconv.Itoa(compiler.currentLine) + ": " + err.Error())
-			return [256]int{}, err
+			allErrors = append(allErrors, err)
 		}
 	}
 

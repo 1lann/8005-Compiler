@@ -1,0 +1,16 @@
+// Outputs: OK
+
+r0 = 0
+
+if r0 != 0 {
+	:printOk
+}
+
+r0 = 'K' :printChar
+
+func printOk {
+	r0 = 0
+	if r0 == 0 {
+		r0 = 'O' :printChar
+	}
+}

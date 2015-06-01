@@ -1,0 +1,12 @@
+// Outputs: 0
+
+r0 = 0
+r0++
+r0 += 2
+r0 -= 2
+r0--
+r0 += 5
+:swap
+r1 -= 2
+:swap
+:printInt

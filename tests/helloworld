@@ -1,0 +1,14 @@
+// Outputs: Hello, world!
+
+r0 = 'H' :printChar
+r0 = 'e' :printChar
+r0 = 'l' :printChar :printChar
+r0 = 'o' :printChar
+r0 = ',' :printChar
+r0 = ' ' :printChar
+r0 = 'w' :printChar
+r0 = 'o' :printChar
+r0 = 'r' :printChar
+r0 = 'l' :printChar
+r0 = 'd' :printChar
+r0 = '!' :printChar

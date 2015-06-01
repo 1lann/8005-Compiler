@@ -1,0 +1,8 @@
+func startLoop {
+	loop {
+		r0 = '9'
+		:printChar
+	}
+}
+
+:startLoop

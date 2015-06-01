@@ -1,0 +1,10 @@
+// Outputs: :D
+
+func test {
+	r0 = ':'
+	:printChar
+	r0 = 'D'
+	:printChar
+}
+
+:test

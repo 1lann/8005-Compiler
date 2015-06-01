@@ -19,9 +19,10 @@ const (
 	tokenBreak          = "TOKEN_BREAK"
 	tokenReturn         = "TOKEN_RETURN"
 	tokenEquals         = "TOKEN_EQUALS"
+	tokenNotEquals      = "TOKEN_NOT_EQUALS"
 	tokenIncrement      = "TOKEN_INCREMENT"
 	tokenDecrement      = "TOKEN_DECREMENT"
-	tokenFunction       = "TOKEN_FUNCTION"
+	tokenFunction       = "TOKEN_FUNCTION_CALL"
 	tokenSet            = "TOKEN_SET"
 	tokenOpenCurly      = "TOKEN_OPEN_CURLY"
 	tokenCloseCurly     = "TOKEN_CLOSE_CURLY"
@@ -71,8 +72,9 @@ func init() {
 	singleTokenMapping["\""] = tokenQuote
 }
 
-func getTokens(str string) []string {
+func getTokens(str string) ([]string, bool) {
 	tokenList := []string{}
+	comment := false
 
 	for len(str) >= 2 {
 		matched := false
@@ -141,6 +143,7 @@ func getTokens(str string) []string {
 		}
 
 		if str == "//" {
+			comment = true
 			break
 		}
 
@@ -156,13 +159,31 @@ func getTokens(str string) []string {
 		}
 	}
 
-	for keyword, token := range singleTokenMapping {
-		if str == keyword {
-			tokenList = append(tokenList, token)
-			str = str[len(keyword):]
-			break
+	if !comment {
+		for keyword, token := range singleTokenMapping {
+			if str == keyword {
+				tokenList = append(tokenList, token)
+				str = str[len(keyword):]
+				break
+			}
+		}
+
+		subAlphaNum := ""
+
+		for i := 0; i < len(str); i++ {
+			if (str[i] >= 'a' && str[i] <= 'z') ||
+				(str[i] >= 'A' && str[i] <= 'Z') ||
+				(str[i] >= '0' && str[i] <= '9') {
+				subAlphaNum += string(str[i])
+			} else {
+				break
+			}
+		}
+
+		if len(subAlphaNum) > 0 {
+			tokenList = append(tokenList, subAlphaNum)
 		}
 	}
 
-	return tokenList
+	return tokenList, comment
 }

@@ -1,0 +1,27 @@
+// Argument: r1
+// Result: r1
+func half {
+	r0 = r1
+	r1 = 0
+
+	loop {
+		r0++
+		if r0 == 0 {
+			r1 = -1
+			break
+		}
+
+		r1++
+		r0 -= 3
+
+		if r0 == 0 {
+			return
+		}
+	}
+}
+
+r1 <- 63
+:half
+
+r0 = r1
+:printInt

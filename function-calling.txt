@@ -27,3 +27,4 @@ TODO LIST:
 - Native functions (Print number/ASCII)
 - Storing/getting variables
 - Fix iotas to support nesting
+- r0 = r1, r1 = r0
