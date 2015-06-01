@@ -19,15 +19,16 @@ const (
 	substitutionGotoFunction   = "SUBSTITUTION_GOTO_FUNCTION:"
 	substitutionLoopStart      = "SUBSTITUTION_LOOP_START:"
 
-	substitutionPushNextPointer = "SUBSTITUTION_PUSH_NEXT_POINTER:" // Pushes the pointer to the next instruction
+	substitutionVariable = "SUBSTITUTION_VARIABLE:"
 )
 
 type instruction struct {
 	value int
 	// substitutionType string
-	line       int    // Corresponding line number
-	key        string // SubstitutionType:Key
-	pointerKey string // SubstitutionType:Key
+	line           int      // Corresponding line number
+	key            string   // SubstitutionType:Key
+	pointerKey     []string // SubstitutionType:Key
+	pushPointerKey []string // SubstitutionType:Key
 }
 
 type block struct {
@@ -40,12 +41,14 @@ type compilerSet struct {
 	instructions [256]int
 	blocks       []block
 	cursor       int
-	keyIota      int
+	newIota      int
+	currentIota  int
 	defineMap    map[string]int // Maps #defines
 	currentLine  int
 	filename     string
 	currentBlock int
 	parentBlocks []int
+	parentIota   []int
 }
 
 const (
@@ -135,6 +138,41 @@ func (set *compilerSet) appendInstruction(instruct instruction) {
 		set.blocks[set.currentBlock].instructions,
 		instruct,
 	)
+}
+
+func (set *compilerSet) addPointerKey(key string) {
+	instructions := set.blocks[set.currentBlock].instructions
+	instructions[len(instructions)-1].pointerKey = append(
+		instructions[len(instructions)-1].pointerKey,
+		key,
+	)
+}
+
+func (set *compilerSet) pushPointerKey(key string) {
+	instructions := set.blocks[set.currentBlock].instructions
+	instructions[len(instructions)-1].pushPointerKey = append(
+		instructions[len(instructions)-1].pushPointerKey,
+		key,
+	)
+}
+
+func (set *compilerSet) getCurrentIota() int {
+
+}
+
+func (set *compilerSet) stepUpIota() int {
+
+}
+
+func (set *compilerSet) setupDownIota() {
+	set.currentIota = set.parentIota[len(set.parentIota)-1]
+	set.parentIota = set.parentIota[:len(set.parentIota)-1]
+}
+
+func (set *compilerSet) getUniqueIota() int {
+	uniqueIota := set.newIota
+	set.newIota++
+	return uniqueIota
 }
 
 func compile(filename string, reader *bufio.Reader) ([256]int, error) {

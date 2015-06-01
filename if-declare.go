@@ -7,7 +7,7 @@ func parseIfDefinition(lexerArray []string, set *compilerSet) error {
 	for cursor < len(lexerArray) {
 		token := lexerArray[cursor]
 		if token != tokenIf {
-			token++
+			cursor++
 			continue
 		}
 

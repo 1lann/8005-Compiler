@@ -7,7 +7,7 @@ func parseLoopDefinition(lexerArray []string, set *compilerSet) error {
 	for cursor < len(lexerArray) {
 		token := lexerArray[cursor]
 		if token != tokenLoop {
-			token++
+			cursor++
 			continue
 		}
 
@@ -20,14 +20,12 @@ func parseLoopDefinition(lexerArray []string, set *compilerSet) error {
 				lexerArray[cursor+1] + "\"")
 		}
 
-		pointerKey := substitutionPushNextPointer +
-			substitutionLoopStart + strconv.Itoa(set.keyIota)
+		pointerKey := substitutionLoopStart + strconv.Itoa(set.keyIota)
 
 		instructions := set.blocks[set.currentBlock].instructions
-		instructions[len(instructions)-1].pointerKey = pointerKey
+		set.pushPointerKey(pointerKey)
 
 		consumeLexerArray(lexerArray, cursor, 2)
-
 		cursor += 2
 	}
 }

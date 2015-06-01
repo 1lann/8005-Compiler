@@ -26,4 +26,4 @@ TODO LIST:
 - Multipliers
 - Native functions (Print number/ASCII)
 - Storing/getting variables
-- Returning/breaking
+- Fix iotas to support nesting

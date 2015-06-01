@@ -35,26 +35,27 @@ func parseBlockClosure(lexerArray []string, set *compilerSet) error {
 			set.parentBlocks = set.parentBlocks[:len(set.parentBlocks)-1]
 
 		case blockIf:
-			pointerKey := substitutionPushNextPointer +
-				substitiutionConditionExit + strconv.Itoa(set.keyIota)
+			pushPointerKey := substitiutionConditionExit +
+				strconv.Itoa(set.keyIota)
 
 			set.keyIota++
-			blockInstructions[len(blockInstructions)-1].pointerKey = pointerKey
+			set.pushPointerKey(pushPointerKey)
 		// Loops are embedded, go back to the start
 		case blockLoop:
 			key := substitutionLoopStart + strconv.Itoa(set.keyIota)
-			pointerKey := substitutionPushNextPointer +
-				substitiutionConditionExit + strconv.Itoa(set.keyIota)
+			pushPointerKey := substitutionLoopStart +
+				strconv.Itoa(set.keyIota)
 			set.keyIota++
 
 			set.appendInstruction(instruction{value: 8})
 			set.appendInstruction(instruction{value: 0, key: key})
 			set.appendInstruction(instruction{value: 9})
-			set.appendInstruction(instruction{value: 0, key: key,
-				pointerKey: pointerKey})
+			set.appendInstruction(instruction{value: 0, key: key})
+			set.pushPointerKey(pushPointerKey)
 		}
 
 		consumeLexerArray(lexerArray, cursor, 1)
+		cursor++
 	}
 
 }

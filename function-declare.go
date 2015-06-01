@@ -21,14 +21,15 @@ func processFunctionDefinition(name string, set *compilerSet) error {
 	set.currentBlock = blockNum
 
 	returnKey := substitutionFrame + name
-	frameKey := substitutionPushNextPointer + substitutionGotoFunction + name
+	pushPointerKey := substitutionGotoFunction + name
 	gotoKey := substitutionFrameReturn + name
 
-	set.appendInstruction(instruction{value: 10, pointerKey: gotoKey})
+	set.appendInstruction(instruction{value: 10})
+	set.addPointerKey(gotoKey)
 	set.appendInstruction(instruction{value: 0})
 	set.appendInstruction(instruction{value: 9})
-	set.appendInstruction(instruction{value: 10, pointerKey: returnKey})
-	set.appendInstruction(instruction{value: 0, pointerKey: frameKey})
+	set.addPointerKey(returnKey)
+	set.pushPointerKey(pushPointerKey)
 
 	return nil
 }
