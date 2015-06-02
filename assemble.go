@@ -20,6 +20,12 @@ func assembleProgram(set *compilerSet) error {
 			allInstructions[i] = instruct
 			i++
 
+			if k == 0 && len(block.imaginaryPushes) > 0 {
+				allInstructions[i-1].pointerKey =
+					append(allInstructions[i-1].pointerKey,
+						block.imaginaryPushes...)
+			}
+
 			if k == len(block.instructions)-1 &&
 				len(instruct.pushPointerKey) > 0 {
 				// Has a push pointer key at end of block, add a padding

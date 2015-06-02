@@ -29,7 +29,8 @@ type instruction struct {
 }
 
 type block struct {
-	name string
+	name            string
+	imaginaryPushes []string
 	// Return point locations are frameLocation + 1 and frameLocation + 3
 	instructions []instruction
 }
@@ -49,18 +50,27 @@ func (set *compilerSet) appendInstruction(instruct instruction) {
 
 func (set *compilerSet) addPointerKey(key string) {
 	instructions := set.blocks[set.currentBlock].instructions
-	instructions[len(instructions)-1].pointerKey = append(
-		instructions[len(instructions)-1].pointerKey,
-		key,
-	)
+	if len(instructions) == 0 {
+		panic("Illegal pointer key")
+	} else {
+		instructions[len(instructions)-1].pointerKey = append(
+			instructions[len(instructions)-1].pointerKey,
+			key,
+		)
+	}
 }
 
 func (set *compilerSet) pushPointerKey(key string) {
 	instructions := set.blocks[set.currentBlock].instructions
-	instructions[len(instructions)-1].pushPointerKey = append(
-		instructions[len(instructions)-1].pushPointerKey,
-		key,
-	)
+	if len(instructions) == 0 {
+		set.blocks[set.currentBlock].imaginaryPushes =
+			append(set.blocks[set.currentBlock].imaginaryPushes, key)
+	} else {
+		instructions[len(instructions)-1].pushPointerKey = append(
+			instructions[len(instructions)-1].pushPointerKey,
+			key,
+		)
+	}
 }
 
 func (set *compilerSet) stepUpIota() int {

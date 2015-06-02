@@ -16223,14 +16223,16 @@ $packages["github.com/1lann/eightc"] = (function() {
 		this.pointerKey = pointerKey_;
 		this.pushPointerKey = pushPointerKey_;
 	});
-	block = $pkg.block = $newType(0, $kindStruct, "eightc.block", "block", "github.com/1lann/eightc", function(name_, instructions_) {
+	block = $pkg.block = $newType(0, $kindStruct, "eightc.block", "block", "github.com/1lann/eightc", function(name_, imaginaryPushes_, instructions_) {
 		this.$val = this;
 		if (arguments.length === 0) {
 			this.name = "";
+			this.imaginaryPushes = sliceType$1.nil;
 			this.instructions = sliceType.nil;
 			return;
 		}
 		this.name = name_;
+		this.imaginaryPushes = imaginaryPushes_;
 		this.instructions = instructions_;
 	});
 	sliceType = $sliceType(instruction);
@@ -16244,7 +16246,7 @@ $packages["github.com/1lann/eightc"] = (function() {
 	ptrType$1 = $ptrType(compilerSet);
 	mapType = $mapType($String, $Int);
 	assembleProgram = function(set) {
-		var $ptr, _entry, _entry$1, _entry$2, _i, _i$1, _i$2, _i$3, _i$4, _i$5, _i$6, _key, _key$1, _ref, _ref$1, _ref$2, _ref$3, _ref$4, _ref$5, _ref$6, _tuple, _tuple$1, _tuple$2, address, allInstructions, block$1, found, found$1, found$2, i, i$1, i$2, instruct, instruct$1, instruct$2, k, key, pointerKeys, pushKey, pushKey$1, pushPointerKeys, set, x, x$1;
+		var $ptr, _entry, _entry$1, _entry$2, _i, _i$1, _i$2, _i$3, _i$4, _i$5, _i$6, _key, _key$1, _ref, _ref$1, _ref$2, _ref$3, _ref$4, _ref$5, _ref$6, _tuple, _tuple$1, _tuple$2, address, allInstructions, block$1, found, found$1, found$2, i, i$1, i$2, instruct, instruct$1, instruct$2, k, key, pointerKeys, pushKey, pushKey$1, pushPointerKeys, set, x, x$1, x$2, x$3;
 		allInstructions = $makeSlice(sliceType, 256);
 		i = 0;
 		_ref = set.blocks;
@@ -16263,6 +16265,9 @@ $packages["github.com/1lann/eightc"] = (function() {
 				}
 				$copy(((i < 0 || i >= allInstructions.$length) ? $throwRuntimeError("index out of range") : allInstructions.$array[allInstructions.$offset + i]), instruct, instruction);
 				i = i + (1) >> 0;
+				if ((k === 0) && block$1.imaginaryPushes.$length > 0) {
+					(x$1 = i - 1 >> 0, ((x$1 < 0 || x$1 >= allInstructions.$length) ? $throwRuntimeError("index out of range") : allInstructions.$array[allInstructions.$offset + x$1])).pointerKey = $appendSlice((x = i - 1 >> 0, ((x < 0 || x >= allInstructions.$length) ? $throwRuntimeError("index out of range") : allInstructions.$array[allInstructions.$offset + x])).pointerKey, block$1.imaginaryPushes);
+				}
 				if ((k === (block$1.instructions.$length - 1 >> 0)) && instruct.pushPointerKey.$length > 0) {
 					$copy(((i < 0 || i >= allInstructions.$length) ? $throwRuntimeError("index out of range") : allInstructions.$array[allInstructions.$offset + i]), new instruction.ptr(0, instruct.line, "", sliceType$1.nil, sliceType$1.nil), instruction);
 					i = i + (1) >> 0;
@@ -16320,7 +16325,7 @@ $packages["github.com/1lann/eightc"] = (function() {
 			if (!(_i$6 < _ref$6.$length)) { break; }
 			i$2 = _i$6;
 			instruct$2 = $clone(((_i$6 < 0 || _i$6 >= _ref$6.$length) ? $throwRuntimeError("index out of range") : _ref$6.$array[_ref$6.$offset + _i$6]), instruction);
-			(x = set.instructions, ((i$2 < 0 || i$2 >= x.length) ? $throwRuntimeError("index out of range") : x[i$2] = instruct$2.value));
+			(x$2 = set.instructions, ((i$2 < 0 || i$2 >= x$2.length) ? $throwRuntimeError("index out of range") : x$2[i$2] = instruct$2.value));
 			if (instruct$2.key.length === 0) {
 				_i$6++;
 				continue;
@@ -16329,7 +16334,7 @@ $packages["github.com/1lann/eightc"] = (function() {
 			if (!found$2) {
 				return errors.New(strconv.Itoa(instruct$2.line) + ": Could not " + "resolve key \"" + instruct$2.key + "\"");
 			} else {
-				(x$1 = set.instructions, ((i$2 < 0 || i$2 >= x$1.length) ? $throwRuntimeError("index out of range") : x$1[i$2] = address));
+				(x$3 = set.instructions, ((i$2 < 0 || i$2 >= x$3.length) ? $throwRuntimeError("index out of range") : x$3[i$2] = address));
 			}
 			_i$6++;
 		}
@@ -16567,9 +16572,9 @@ $packages["github.com/1lann/eightc"] = (function() {
 		compiler[0].filename = filename;
 		compiler[0].currentBlock = 0;
 		compiler[0].defineMap = new $Map();
-		compiler[0].blocks = $append(compiler[0].blocks, new block.ptr("main", sliceType.nil));
+		compiler[0].blocks = $append(compiler[0].blocks, new block.ptr("main", sliceType$1.nil, sliceType.nil));
 		compiler[0].tempMemory = compiler[0].getUniqueIota();
-		tempMemoryBlock = new block.ptr("", sliceType.nil);
+		tempMemoryBlock = new block.ptr("", sliceType$1.nil, sliceType.nil);
 		tempMemoryBlock.instructions = $append(tempMemoryBlock.instructions, new instruction.ptr(0, 0, "", sliceType$1.nil, sliceType$1.nil));
 		compiler[0].blocks = $append(compiler[0].blocks, tempMemoryBlock);
 		compiler[0].currentBlock = 1;
@@ -16728,7 +16733,7 @@ $packages["github.com/1lann/eightc"] = (function() {
 	processFunctionDefinition = function(name, set) {
 		var $ptr, blockNum, gotoKey, name, newBlock, pushPointerKey, returnKey, set;
 		blockNum = set.blocks.$length;
-		newBlock = new block.ptr("", sliceType.nil);
+		newBlock = new block.ptr("", sliceType$1.nil, sliceType.nil);
 		newBlock.name = name;
 		set.blocks = $append(set.blocks, newBlock);
 		set.parentBlocks = $append(set.parentBlocks, set.currentBlock);
@@ -16944,14 +16949,22 @@ $packages["github.com/1lann/eightc"] = (function() {
 		var $ptr, instructions, key, set, x, x$1, x$2, x$3;
 		set = this;
 		instructions = (x = set.blocks, x$1 = set.currentBlock, ((x$1 < 0 || x$1 >= x.$length) ? $throwRuntimeError("index out of range") : x.$array[x.$offset + x$1])).instructions;
-		(x$3 = instructions.$length - 1 >> 0, ((x$3 < 0 || x$3 >= instructions.$length) ? $throwRuntimeError("index out of range") : instructions.$array[instructions.$offset + x$3])).pointerKey = $append((x$2 = instructions.$length - 1 >> 0, ((x$2 < 0 || x$2 >= instructions.$length) ? $throwRuntimeError("index out of range") : instructions.$array[instructions.$offset + x$2])).pointerKey, key);
+		if (instructions.$length === 0) {
+			$panic(new $String("Illegal pointer key"));
+		} else {
+			(x$3 = instructions.$length - 1 >> 0, ((x$3 < 0 || x$3 >= instructions.$length) ? $throwRuntimeError("index out of range") : instructions.$array[instructions.$offset + x$3])).pointerKey = $append((x$2 = instructions.$length - 1 >> 0, ((x$2 < 0 || x$2 >= instructions.$length) ? $throwRuntimeError("index out of range") : instructions.$array[instructions.$offset + x$2])).pointerKey, key);
+		}
 	};
 	compilerSet.prototype.addPointerKey = function(key) { return this.$val.addPointerKey(key); };
 	compilerSet.ptr.prototype.pushPointerKey = function(key) {
-		var $ptr, instructions, key, set, x, x$1, x$2, x$3;
+		var $ptr, instructions, key, set, x, x$1, x$2, x$3, x$4, x$5, x$6, x$7;
 		set = this;
 		instructions = (x = set.blocks, x$1 = set.currentBlock, ((x$1 < 0 || x$1 >= x.$length) ? $throwRuntimeError("index out of range") : x.$array[x.$offset + x$1])).instructions;
-		(x$3 = instructions.$length - 1 >> 0, ((x$3 < 0 || x$3 >= instructions.$length) ? $throwRuntimeError("index out of range") : instructions.$array[instructions.$offset + x$3])).pushPointerKey = $append((x$2 = instructions.$length - 1 >> 0, ((x$2 < 0 || x$2 >= instructions.$length) ? $throwRuntimeError("index out of range") : instructions.$array[instructions.$offset + x$2])).pushPointerKey, key);
+		if (instructions.$length === 0) {
+			(x$4 = set.blocks, x$5 = set.currentBlock, ((x$5 < 0 || x$5 >= x$4.$length) ? $throwRuntimeError("index out of range") : x$4.$array[x$4.$offset + x$5])).imaginaryPushes = $append((x$2 = set.blocks, x$3 = set.currentBlock, ((x$3 < 0 || x$3 >= x$2.$length) ? $throwRuntimeError("index out of range") : x$2.$array[x$2.$offset + x$3])).imaginaryPushes, key);
+		} else {
+			(x$7 = instructions.$length - 1 >> 0, ((x$7 < 0 || x$7 >= instructions.$length) ? $throwRuntimeError("index out of range") : instructions.$array[instructions.$offset + x$7])).pushPointerKey = $append((x$6 = instructions.$length - 1 >> 0, ((x$6 < 0 || x$6 >= instructions.$length) ? $throwRuntimeError("index out of range") : instructions.$array[instructions.$offset + x$6])).pushPointerKey, key);
+		}
 	};
 	compilerSet.prototype.pushPointerKey = function(key) { return this.$val.pushPointerKey(key); };
 	compilerSet.ptr.prototype.stepUpIota = function() {
@@ -17349,7 +17362,7 @@ $packages["github.com/1lann/eightc"] = (function() {
 			_i++;
 		}
 		if (!found) {
-			variableBlock = new block.ptr((x$11 = cursor.$get() + 2 >> 0, ((x$11 < 0 || x$11 >= lexerArray.$length) ? $throwRuntimeError("index out of range") : lexerArray.$array[lexerArray.$offset + x$11])), sliceType.nil);
+			variableBlock = new block.ptr((x$11 = cursor.$get() + 2 >> 0, ((x$11 < 0 || x$11 >= lexerArray.$length) ? $throwRuntimeError("index out of range") : lexerArray.$array[lexerArray.$offset + x$11])), sliceType$1.nil, sliceType.nil);
 			variableBlock.instructions = $append(variableBlock.instructions, new instruction.ptr(0, set.currentLine, "", new sliceType$1(["SUBSTITUTION_VARIABLE:" + (x$12 = cursor.$get() + 2 >> 0, ((x$12 < 0 || x$12 >= lexerArray.$length) ? $throwRuntimeError("index out of range") : lexerArray.$array[lexerArray.$offset + x$12]))]), sliceType$1.nil));
 			set.blocks = $append(set.blocks, variableBlock);
 		}
@@ -17361,7 +17374,7 @@ $packages["github.com/1lann/eightc"] = (function() {
 	ptrType$1.methods = [{prop: "warn", name: "warn", pkg: "github.com/1lann/eightc", typ: $funcType([$String], [], false)}, {prop: "appendInstruction", name: "appendInstruction", pkg: "github.com/1lann/eightc", typ: $funcType([instruction], [], false)}, {prop: "addPointerKey", name: "addPointerKey", pkg: "github.com/1lann/eightc", typ: $funcType([$String], [], false)}, {prop: "pushPointerKey", name: "pushPointerKey", pkg: "github.com/1lann/eightc", typ: $funcType([$String], [], false)}, {prop: "stepUpIota", name: "stepUpIota", pkg: "github.com/1lann/eightc", typ: $funcType([], [$Int], false)}, {prop: "stepDownIota", name: "stepDownIota", pkg: "github.com/1lann/eightc", typ: $funcType([], [$error], false)}, {prop: "getUniqueIota", name: "getUniqueIota", pkg: "github.com/1lann/eightc", typ: $funcType([], [$Int], false)}];
 	compilerSet.init([{prop: "instructions", name: "instructions", pkg: "github.com/1lann/eightc", typ: arrayType, tag: ""}, {prop: "blocks", name: "blocks", pkg: "github.com/1lann/eightc", typ: sliceType$2, tag: ""}, {prop: "cursor", name: "cursor", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}, {prop: "newIota", name: "newIota", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}, {prop: "currentIota", name: "currentIota", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}, {prop: "defineMap", name: "defineMap", pkg: "github.com/1lann/eightc", typ: mapType, tag: ""}, {prop: "currentLine", name: "currentLine", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}, {prop: "filename", name: "filename", pkg: "github.com/1lann/eightc", typ: $String, tag: ""}, {prop: "currentBlock", name: "currentBlock", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}, {prop: "currentType", name: "currentType", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}, {prop: "parentBlocks", name: "parentBlocks", pkg: "github.com/1lann/eightc", typ: sliceType$3, tag: ""}, {prop: "parentIota", name: "parentIota", pkg: "github.com/1lann/eightc", typ: sliceType$3, tag: ""}, {prop: "parentTypes", name: "parentTypes", pkg: "github.com/1lann/eightc", typ: sliceType$3, tag: ""}, {prop: "tempMemory", name: "tempMemory", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}]);
 	instruction.init([{prop: "value", name: "value", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}, {prop: "line", name: "line", pkg: "github.com/1lann/eightc", typ: $Int, tag: ""}, {prop: "key", name: "key", pkg: "github.com/1lann/eightc", typ: $String, tag: ""}, {prop: "pointerKey", name: "pointerKey", pkg: "github.com/1lann/eightc", typ: sliceType$1, tag: ""}, {prop: "pushPointerKey", name: "pushPointerKey", pkg: "github.com/1lann/eightc", typ: sliceType$1, tag: ""}]);
-	block.init([{prop: "name", name: "name", pkg: "github.com/1lann/eightc", typ: $String, tag: ""}, {prop: "instructions", name: "instructions", pkg: "github.com/1lann/eightc", typ: sliceType, tag: ""}]);
+	block.init([{prop: "name", name: "name", pkg: "github.com/1lann/eightc", typ: $String, tag: ""}, {prop: "imaginaryPushes", name: "imaginaryPushes", pkg: "github.com/1lann/eightc", typ: sliceType$1, tag: ""}, {prop: "instructions", name: "instructions", pkg: "github.com/1lann/eightc", typ: sliceType, tag: ""}]);
 	$init = function() {
 		$pkg.$init = function() {};
 		/* */ var $f, $c = false, $s = 0, $r; if (this !== undefined && this.$blk !== undefined) { $f = this; $c = true; $s = $f.$s; $r = $f.$r; } s: while (true) { switch ($s) { case 0:
