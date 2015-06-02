@@ -229,6 +229,16 @@ func Compile(filename string, reader *bufio.Reader) ([256]int, error) {
 
 	for {
 		lineData, err := reader.ReadBytes('\n')
+
+		line := string(lineData)
+		compiler.currentLine++
+
+		if err := compileLine(line, &compiler); err != nil {
+			err = errors.New(compiler.filename + ":" +
+				strconv.Itoa(compiler.currentLine) + ": " + err.Error())
+			allErrors = append(allErrors, err)
+		}
+
 		if err != nil {
 			if err == io.EOF {
 				if compiler.currentBlock > 0 {
@@ -277,15 +287,6 @@ func Compile(filename string, reader *bufio.Reader) ([256]int, error) {
 
 			fmt.Println("Error reading file:", err)
 			return [256]int{}, err
-		}
-
-		line := string(lineData)
-		compiler.currentLine++
-
-		if err := compileLine(line, &compiler); err != nil {
-			err = errors.New(compiler.filename + ":" +
-				strconv.Itoa(compiler.currentLine) + ": " + err.Error())
-			allErrors = append(allErrors, err)
 		}
 	}
 

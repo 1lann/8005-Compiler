@@ -151,7 +151,6 @@ func getTokens(str string) ([]string, bool) {
 			if str[0] == ';' {
 				str = str[1:]
 			} else {
-				// fmt.Println("Lexer warning: Skipping character \"" + str[:1] + "\"")
 				tokenList = append(tokenList, str[:1])
 				str = str[1:]
 			}
