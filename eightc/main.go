@@ -19,7 +19,7 @@ func cliHandle() (*bufio.Reader, string) {
 
 	if fileName == "-h" || fileName == "--help" {
 		fmt.Println("8005 Compiler by Jason Chu")
-		fmt.Println("Usage: 8005c [file name]")
+		fmt.Println("Usage: eightc [file name]")
 		return nil, ""
 	}
 
