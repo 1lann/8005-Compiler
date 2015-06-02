@@ -1,3 +1,5 @@
+// Prints the half of the value at address 63
+
 // Argument: r1
 // Result: r1
 func half {

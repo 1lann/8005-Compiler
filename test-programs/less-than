@@ -1,0 +1,46 @@
+r0 <- 14
+r0 -> firstNum
+r0 <- 15
+r0 -> secondNum
+
+r0 <- firstNum
+
+if r0 == 0 {
+	// Will always be smaller
+	r0 = 1
+	:printInt
+	return
+}
+
+r0 <- secondNum
+
+if r0 == 0 {
+	// Will always be larger
+	r0 = 0
+	:printInt
+	return
+}
+
+loop {
+	r1 <- firstNum
+	r1--
+	r1 -> firstNum
+	r0 = r1
+
+	if r0 == 0 {
+		r0 = 1
+		:printInt
+		break
+	}
+
+	r1 <- secondNum
+	r1--
+	r1 -> secondNum
+	r0 = r1
+
+	if r0 == 0 {
+		r0 = 0
+		:printInt
+		break
+	}
+}

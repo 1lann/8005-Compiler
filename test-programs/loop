@@ -1,3 +1,5 @@
+// Outputs 9 repeatedly
+
 func startLoop {
 	loop {
 		r0 = '9'

@@ -10,7 +10,7 @@ func assembleProgram(set *compilerSet) error {
 	allInstructions := make([]instruction, 256)
 
 	// "Flattens" instructions
-	i := 20
+	i := 0
 	for _, block := range set.blocks {
 		for k, instruct := range block.instructions {
 			if i >= 255 {

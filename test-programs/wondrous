@@ -1,3 +1,5 @@
+// Prints wondrous starting from value at address 255
+
 // Argument: r1
 // Return: r1
 func half {

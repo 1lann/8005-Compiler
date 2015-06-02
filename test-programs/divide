@@ -1,3 +1,5 @@
+// Divides the number at address 254 by 255 and prints the result
+
 // Arguments: r1 / divBy
 // Return: r1
 func divide {
@@ -45,86 +47,11 @@ func divide {
 	}
 }
 
-// Arguments: r1
-// Returns: r1 (0 or !0)
-func isPrime {
-	r0 = 1
-	r0 -> divBy
-	r1 -> testNum
-
-	// if r0 == 0 {
-	// 	r1 = 0
-	// 	return
-	// }
-
-	r0 = r1
-	r0--
-	if r0 == 0 {
-		r1 = 0
-		return
-	}
-
-	loop {
-		// Check if r1 is divisible by anything below it
-		r0 <- divBy
-		r0++
-		r0 -> divBy
-
-		r1 <- testNum
-
-		r0 -= r1
-		if r0 == 0 {
-			// We've reached the same number
-			r1 = 1
-			return
-		}
-
-		:divide
-
-		r0 = r1
-
-		r0 -> testResult
-		r0++
-
-		if r0 != 0 {
-			r0 = r1
-			r0--
-			if r0 != 0 {
-				// Division success, not prime
-				r1 = 0
-				return
-			}
-		}
-	}
-
-	// It is prime
-	r1 = 1
-	return
-}
-
-// Get all prime numbers 0 - 255
 r0 <- 255
-if r0 != 0 {
-	r1 <- 255
+r0 -> divBy
+r1 <- 254
 
-	r0 = r1
-	:printInt
-	r0 = ' ' :printChar
-	r0 = 'i' :printChar
-	r0 = 's' :printChar
-	r0 = ' ' :printChar
+:divide
 
-	:isPrime
-	if r0 == 0 {
-		r0 = 'n' :printChar
-		r0 = 'o' :printChar
-		r0 = 't' :printChar
-		r0 = ' ' :printChar
-	}
-	r0 = 'p' :printChar
-	r0 = 'r' :printChar
-	r0 = 'i' :printChar
-	r0 = 'm' :printChar
-	r0 = 'e' :printChar
-	return
-}
+r0 = r1
+:printInt
