@@ -1,7 +1,5 @@
 package eightc
 
-import "fmt"
-
 const (
 	tokenR0             = "TOKEN_R0"
 	tokenR1             = "TOKEN_R1"
@@ -154,7 +152,7 @@ func getTokens(str string) ([]string, bool) {
 				str = str[1:]
 			} else {
 				// fmt.Println("Lexer warning: Skipping character \"" + str[:1] + "\"")
-				tokenList = append(tokenList, str[0])
+				tokenList = append(tokenList, str[:1])
 				str = str[1:]
 			}
 		}
