@@ -1,4 +1,4 @@
-package main
+package eightc
 
 func parseFunctionReturn(lexerArray []string, cursor *int, set *compilerSet) error {
 	token := lexerArray[*cursor]

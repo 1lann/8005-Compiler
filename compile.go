@@ -1,4 +1,4 @@
-package main
+package eightc
 
 import (
 	"bufio"
@@ -207,7 +207,7 @@ func consumeLexerArray(lexerArray []string, cursor *int, length int) {
 	*cursor += length
 }
 
-func compile(filename string, reader *bufio.Reader) ([256]int, error) {
+func Compile(filename string, reader *bufio.Reader) ([256]int, error) {
 	compiler := compilerSet{}
 	compiler.filename = filename
 	compiler.currentBlock = 0

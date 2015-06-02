@@ -1,4 +1,4 @@
-package main
+package eightc
 
 import "strconv"
 

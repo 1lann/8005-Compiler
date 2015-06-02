@@ -4,6 +4,7 @@ import (
 	"bufio"
 	// "errors"
 	"fmt"
+	"github.com/1lann/eightc"
 	"os"
 	"strconv"
 )
@@ -48,7 +49,7 @@ func main() {
 		return
 	}
 
-	out, err := compile(filename, reader)
+	out, err := eightc.Compile(filename, reader)
 	if err != nil {
 		fmt.Println("Failed to compile!")
 		fmt.Println(err)
