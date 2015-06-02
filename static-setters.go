@@ -54,15 +54,9 @@ func parseStaticSet(lexerArray []string, cursor *int, set *compilerSet) error {
 		num, _ := strconv.Atoi(lexerArray[*cursor+2])
 		writeStaticSetterInstruction(token, num, set)
 	} else {
-		// Is either a #define or variable
-		deref := lexerArray[*cursor+2]
-		if value, found := set.defineMap[deref]; found {
-			writeStaticSetterInstruction(token, value, set)
-		} else {
-			return errors.New("Unknown dereferencable object \"" +
-				deref + "\". Did you mean to " +
-				"use a key-store variable through \"<-\" instead?")
-		}
+		return errors.New("Unknown dereferencable object \"" +
+			lexerArray[*cursor+2] + "\". Did you mean to " +
+			"use a key-store variable through \"<-\" instead?")
 	}
 
 	consumeLexerArray(lexerArray, cursor, 3)

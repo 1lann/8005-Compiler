@@ -78,6 +78,16 @@ func convertNegative(str string) string {
 	return str
 }
 
+func replaceDefines(lexerArray []string, set *compilerSet) {
+	for define, value := range set.defineMap {
+		for i, word := range lexerArray {
+			if word == define {
+				lexerArray[i] = strconv.Itoa(value)
+			}
+		}
+	}
+}
+
 func compileLine(line string, set *compilerSet) error {
 	line = strings.Replace(line, "\t", " ", -1)
 	line = convertChars(line)
@@ -95,6 +105,8 @@ func compileLine(line string, set *compilerSet) error {
 			break
 		}
 	}
+
+	replaceDefines(lexerArray, set)
 
 	lastCursor := -1
 	lexerCursor := 0
