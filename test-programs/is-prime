@@ -106,7 +106,6 @@ func isPrime {
 	return
 }
 
-// Get all prime numbers 0 - 255
 r0 <- 255
 if r0 != 0 {
 	r1 <- 255
