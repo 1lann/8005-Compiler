@@ -1,0 +1,144 @@
+// Written in ~1 hour with is-prime
+// Lists all primes from 0 - 255
+
+// Arguments: r1 / divBy
+// Return: r1
+func divide {
+	r0 = r1
+	r1 = 0
+
+	loop {
+		r1 -> lastIncrementer
+		r0 -> lastDivisor
+
+		// Check for indivisibility
+		r1 <- divBy
+		r1--
+		r0 -> indivCheck
+		loop {
+			r0 <- indivCheck
+			r0++
+
+			if r0 == 0 {
+				r1 = -1
+				return
+			}
+
+			r0 -> indivCheck
+
+			r0 = r1
+			if r0 == 0 {
+				// Ok, divisible so far
+				break
+			}
+			r1--
+		}
+
+		r0 <- lastDivisor
+
+		r1 <- divBy
+		r0 -= r1
+
+		r1 <- lastIncrementer
+		r1++
+
+		if r0 == 0 {
+			return
+		}
+	}
+}
+
+// Arguments: r1
+// Returns: r1 (0 or !0)
+func isPrime {
+	r0 = 1
+	r0 -> divBy
+	r1 -> testNum
+
+	// if r0 == 0 {
+	// 	r1 = 0
+	// 	return
+	// }
+
+	r0 = r1
+
+	r0--
+	if r0 == 0 {
+		r1 = 0
+		return
+	}
+
+	loop {
+		// Check if r1 is divisible by anything below it
+		r0 <- divBy
+		r0++
+		r0 -> divBy
+
+		r1 <- testNum
+
+		r0 -= r1
+		if r0 == 0 {
+			// We've reached the same number
+			r1 = 1
+			return
+		}
+
+		:divide
+
+		r0 = r1
+
+		r0 -> testResult
+		r0++
+
+		if r0 != 0 {
+			r0 = r1
+			r0--
+			if r0 != 0 {
+				// Division success, not prime
+				r1 = 0
+				return
+			}
+		}
+	}
+
+	// It is prime
+	r1 = 1
+	return
+}
+
+r0 = 'p' :printChar
+r0 = 'r' :printChar
+r0 = 'i' :printChar
+r0 = 'm' :printChar
+r0 = 'e' :printChar
+r0 = 's' :printChar
+r0 = ':' :printChar
+r0 = ' ' :printChar
+
+r1 = 0
+r1 -> curNum
+
+loop {
+	r1 <- curNum
+	r1++
+
+	r0 = r1
+	if r0 == 0 {
+		return
+	}
+
+	r1 -> curNum
+
+	:isPrime
+
+	r0 = r1
+	if r0 != 0 {
+		// Prime
+		r0 <- curNum
+		:printInt
+		r0 = ','
+		:printChar
+		r0 = ' '
+		:printChar
+	}
+}

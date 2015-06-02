@@ -43,11 +43,28 @@ func parseSetVariable(lexerArray []string, cursor *int, set *compilerSet) error 
 		return nil
 	}
 
-	variableBlock := block{}
-	variableBlock.instructions = append(variableBlock.instructions,
-		instruction{pointerKey: []string{substitutionVariable +
-			lexerArray[*cursor+2]}})
-	set.blocks = append(set.blocks, variableBlock)
+	found := false
+	for _, block := range set.blocks {
+		if block.name == lexerArray[*cursor+2] {
+			if len(block.instructions) != 1 ||
+				len(block.instructions[0].pointerKey) != 1 ||
+				block.instructions[0].pointerKey[0] != substitutionVariable+
+					lexerArray[*cursor+2] {
+				return errors.New("Cannot have variable and function with " +
+					"the same name")
+			}
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		variableBlock := block{name: lexerArray[*cursor+2]}
+		variableBlock.instructions = append(variableBlock.instructions,
+			instruction{pointerKey: []string{substitutionVariable +
+				lexerArray[*cursor+2]}, line: set.currentLine})
+		set.blocks = append(set.blocks, variableBlock)
+	}
 
 	set.appendInstruction(instruction{value: 12 + instructDiff})
 	set.appendInstruction(instruction{key: substitutionVariable +

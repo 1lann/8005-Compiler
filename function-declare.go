@@ -57,6 +57,13 @@ func parseFunctionDefinition(lexerArray []string, cursor *int, set *compilerSet)
 			lexerArray[*cursor+2] + "\"")
 	}
 
+	for _, block := range set.blocks {
+		if block.name == lexerArray[*cursor+2] {
+			return errors.New("Attempt to redefine function \"" +
+				lexerArray[*cursor+2] + "\"")
+		}
+	}
+
 	err := processFunctionDefinition(lexerArray[*cursor+1], set)
 	if err != nil {
 		return err

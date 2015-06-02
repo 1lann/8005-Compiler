@@ -264,6 +264,9 @@ func compile(filename string, reader *bufio.Reader) ([256]int, error) {
 						errors.New(concat)
 				}
 
+				compiler.appendInstruction(instruction{value: 0})
+				compiler.addPointerKey(substitutionFrameReturn + "main")
+
 				if err := assembleProgram(&compiler); err != nil {
 					return [256]int{},
 						errors.New(compiler.filename + ":" + err.Error())

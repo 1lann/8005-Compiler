@@ -1,0 +1,16 @@
+// Outputs: 42
+
+r0 = 20
+r0 -> derp
+r1 <- derp
+r1++
+r1 -> herp
+r0 <- herp
+r1 <- derp
+r0 += r1
+r0 -> derp
+r1 <- derp
+r1++
+r1 -> cat
+r0 <- cat
+:printInt

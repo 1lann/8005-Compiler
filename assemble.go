@@ -13,8 +13,8 @@ func assembleProgram(set *compilerSet) error {
 	i := 0
 	for _, block := range set.blocks {
 		for k, instruct := range block.instructions {
-			if i > 256 {
-				return errors.New("The program does not fit in the 256 " +
+			if i >= 255 {
+				return errors.New(" The program does not fit in the 256 " +
 					"byte instruction limit!")
 			}
 			allInstructions[i] = instruct
@@ -23,7 +23,7 @@ func assembleProgram(set *compilerSet) error {
 			if k == len(block.instructions)-1 &&
 				len(instruct.pushPointerKey) > 0 {
 				// Has a push pointer key at end of block, add a padding
-				allInstructions[i] = instruction{value: 0}
+				allInstructions[i] = instruction{value: 0, line: instruct.line}
 				i++
 			}
 		}
