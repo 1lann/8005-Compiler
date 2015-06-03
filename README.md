@@ -9,7 +9,7 @@ Install Go, setup your $GOPATH and run
 `eightc [file name]`
 
 ## How to use
-See [/test-programs](/test-programs) for examples.
+See [test-programs/](test-programs/) for examples.
 
 A list of internal functions:
 - `:printChar` prints r0 as an ASCII character
@@ -23,4 +23,4 @@ A list of internal functions:
 and exiting if statements. Use r1 instead which is not used internally by the compiler when compiling.
 
 ## License
-eightc is licensed under the MIT license, see [/LICENSE.txt](LICENSE.txt)
+eightc is licensed under the MIT license, see [LICENSE.txt](LICENSE.txt)
