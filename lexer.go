@@ -126,7 +126,7 @@ func getTokens(str string) ([]string, bool) {
 			if (str[i] >= 'a' && str[i] <= 'z') ||
 				(str[i] >= 'A' && str[i] <= 'Z') ||
 				(str[i] >= '0' && str[i] <= '9') ||
-				(str[i] == '_') || (str[i] == '-') {
+				(str[i] == '_') {
 				subAlphaNum += string(str[i])
 			} else {
 				break
@@ -173,7 +173,7 @@ func getTokens(str string) ([]string, bool) {
 			if (str[i] >= 'a' && str[i] <= 'z') ||
 				(str[i] >= 'A' && str[i] <= 'Z') ||
 				(str[i] >= '0' && str[i] <= '9') ||
-				(str[i] == '_') || (str[i] == '-') {
+				(str[i] == '_') {
 				subAlphaNum += string(str[i])
 			} else {
 				break
